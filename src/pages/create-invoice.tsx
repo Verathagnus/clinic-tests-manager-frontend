@@ -18,6 +18,7 @@ import {
 import InvoiceComponent from '@/components/InvoiceComponent';
 import { ItemProp } from '@/types/types';
 import { toast } from 'sonner';
+import PdfViewer from '@/components/PdfViewer';
 
 const CreateInvoice = () => {
   const [patientName, setPatientName] = useState('');
