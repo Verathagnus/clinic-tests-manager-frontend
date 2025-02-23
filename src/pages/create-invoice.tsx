@@ -1,3 +1,4 @@
+"use client"
 import { useState, useEffect, useRef } from 'react';
 import api from '../utils/api';
 import { useReactToPrint } from 'react-to-print';
@@ -18,7 +19,7 @@ import InvoiceComponent from '@/components/InvoiceComponent';
 
 const CreateInvoice = () => {
   const [patientName, setPatientName] = useState('');
-  const [patientAge, setPatientAge] = useState('');
+  const [patientAge, setPatientAge] = useState<number>();
   const [patientAddress, setPatientAddress] = useState('');
   const [patientPhone, setPatientPhone] = useState('');
   const [items, setItems] = useState<{ id: any, price: number, name: string, description: string }[]>([]);
@@ -141,7 +142,7 @@ const CreateInvoice = () => {
               <h3 className="text-lg font-semibold mb-4 text-gray-700">Patient Details</h3>
               <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="name" className="text-gray-600">Name</Label>
+                  <Label htmlFor="name" className="text-gray-600">Name<span className="text-red-800"> *</span></Label>
                   <Input
                     id="name"
                     placeholder="Patient Name"
@@ -149,6 +150,7 @@ const CreateInvoice = () => {
                     onChange={(e) => setPatientName(e.target.value)}
                     disabled={isSubmitted}
                     className="border-gray-300  "
+                    required
                   />
                 </div>
                 <div className="grid gap-2">
@@ -158,7 +160,7 @@ const CreateInvoice = () => {
                     type="number"
                     placeholder="Age"
                     value={patientAge}
-                    onChange={(e) => setPatientAge(e.target.value)}
+                    onChange={(e) => {if (e.target.value === '' ||  /^[0-9\b]+$/.test(e.target.value)) {setPatientAge(parseInt(e.target.value))}}}
                     disabled={isSubmitted}
                     className="border-gray-300  "
                   />
@@ -217,7 +219,7 @@ const CreateInvoice = () => {
                       {items
                         .filter((item) =>
                           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.description.toLowerCase().includes(searchTerm.toLowerCase())
+                          item.description?.toLowerCase().includes(searchTerm.toLowerCase())
                         )
                         .map((item) => (
                           <TableRow key={item.id}>
@@ -347,7 +349,7 @@ const CreateInvoice = () => {
               className="mt-6 w-full  text-white"
               size="lg"
               variant="default"
-              disabled={selectedItems.length === 0} // Disable if no items are selected
+              disabled={selectedItems.length === 0 || patientName.length === 0} // Disable if no items are selected
             >
               Submit Invoice
             </Button>
