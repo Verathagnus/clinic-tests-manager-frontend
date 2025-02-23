@@ -30,6 +30,8 @@ const CreateInvoice = () => {
   const [discount, setDiscount] = useState<number>(0);
   const [amountPaid, setAmountPaid] = useState<number>(0);
   const [remarks, setRemarks] = useState('');
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null); // State for PDF URL
+  const [isPdfOpen, setIsPdfOpen] = useState(false); // State for PDF viewer modal
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -53,25 +55,43 @@ const CreateInvoice = () => {
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentInvoiceId, setCurrentInvoiceId] = useState<number | null>(null);
-  const componentRef = useRef<HTMLDivElement>(null);
 
-  const handlePrint = useReactToPrint({
-    documentTitle: `Invoice-${currentInvoiceId}`,
-    contentRef: componentRef,
-    pageStyle: `
-      @page {
-        size: A5;
-        margin: 10mm;
-      }
-    `,
-  });
+  const handlePrintInvoice = async (invoiceId: number) => {
+    try {
+      const response = await api.get(`/invoices/${invoiceId}/print`, {
+        responseType: 'blob', // Ensure the response is treated as a binary file
+      });
+
+      // Create a Blob URL for the PDF
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      // Log the blob and URL for debugging
+      console.log('Blob:', blob);
+      console.log('Blob URL:', url);
+
+      setPdfUrl(url);
+      setIsPdfOpen(true); // Open the PDF viewer
+    } catch (error) {
+      console.error('Error printing invoice:', error);
+      toast.error('Failed to load PDF. Please try again.');
+    }
+  };
+
+  const closePdfViewer = () => {
+    setIsPdfOpen(false);
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl); // Clean up the Blob URL
+      setPdfUrl(null);
+    }
+  };
 
   const handleCreateInvoice = async () => {
     try {
       const response = await api.post('/invoices', {
         patient: {
           name: patientName,
-          age: parseInt(patientAge+""),
+          age: parseInt(patientAge + ""),
           address: patientAddress,
           phone: patientPhone,
         },
@@ -84,10 +104,10 @@ const CreateInvoice = () => {
 
       setCurrentInvoiceId(response.data.id);
       setIsSubmitted(true);
-      handlePrint();
+      handlePrintInvoice(response.data.id)
     } catch (error) {
       console.error('Error creating invoice:', error);
-      toast.success('Error creating invoice');
+      toast.error('Error creating invoice');
 
     }
   };
@@ -105,15 +125,15 @@ const CreateInvoice = () => {
     setCurrentInvoiceId(null);
   };
 
-  const subtotal = selectedItems.reduce((total, item) => total + parseFloat(item.price+""), 0);
+  const subtotal = selectedItems.reduce((total, item) => total + parseFloat(item.price + ""), 0);
   const grandTotal = subtotal - discount;
   const balanceAmount = grandTotal - amountPaid;
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6 space-y-6 bg-gray-100 ">
-      <div style={{ display: "none" }}>
-        
-      </div>
+      {isPdfOpen && pdfUrl && (
+        <PdfViewer isOpen={isPdfOpen} pdfUrl={pdfUrl} onClose={closePdfViewer} />
+      )}
       <Card className="mb-6 shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl font-bold ">Create Invoice</CardTitle>
@@ -122,7 +142,7 @@ const CreateInvoice = () => {
           {isSubmitted && (
             <div className="flex gap-4 mb-6">
               <Button
-                onClick={() => handlePrint()}
+                onClick={() => { if (currentInvoiceId) handlePrintInvoice(currentInvoiceId) }}
                 variant="default"
                 className="  text-white"
               >
@@ -161,7 +181,7 @@ const CreateInvoice = () => {
                     type="number"
                     placeholder="Age"
                     value={patientAge}
-                    onChange={(e) => {if (e.target.value === '' ||  /^[0-9\b]+$/.test(e.target.value)) {setPatientAge(parseInt(e.target.value))}}}
+                    onChange={(e) => { if (e.target.value === '' || /^[0-9\b]+$/.test(e.target.value)) { setPatientAge(parseInt(e.target.value)) } }}
                     disabled={isSubmitted}
                     className="border-gray-300  "
                   />

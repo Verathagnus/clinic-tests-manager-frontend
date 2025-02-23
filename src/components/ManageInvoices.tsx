@@ -104,6 +104,7 @@ const ManageInvoices = () => {
       toast.error('Failed to update discount. Please try again.'); // Error toast
     }
   };
+  
   const refreshInvoices = async () => {
     const response = await api.get('/invoices', {
       params: { page, startDate, endDate },
