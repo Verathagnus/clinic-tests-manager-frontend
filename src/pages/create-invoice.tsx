@@ -16,14 +16,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import InvoiceComponent from '@/components/InvoiceComponent';
+import { ItemProp } from '@/types/types';
+import { toast } from 'sonner';
 
 const CreateInvoice = () => {
   const [patientName, setPatientName] = useState('');
   const [patientAge, setPatientAge] = useState<number>();
   const [patientAddress, setPatientAddress] = useState('');
   const [patientPhone, setPatientPhone] = useState('');
-  const [items, setItems] = useState<{ id: any, price: number, name: string, description: string }[]>([]);
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [items, setItems] = useState<{ id: number, price: number, name: string, description: string }[]>([]);
+  const [selectedItems, setSelectedItems] = useState<ItemProp[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [discount, setDiscount] = useState<number>(0);
   const [amountPaid, setAmountPaid] = useState<number>(0);
@@ -37,7 +39,7 @@ const CreateInvoice = () => {
     fetchItems();
   }, []);
 
-  const handleAddItem = (item: any) => {
+  const handleAddItem = (item: ItemProp) => {
     if (!selectedItems.some((selectedItem) => selectedItem.id === item.id)) {
       setSelectedItems((prevSelectedItems) => [...prevSelectedItems, item]);
     }
@@ -69,7 +71,7 @@ const CreateInvoice = () => {
       const response = await api.post('/invoices', {
         patient: {
           name: patientName,
-          age: parseInt(patientAge),
+          age: parseInt(patientAge+""),
           address: patientAddress,
           phone: patientPhone,
         },
@@ -78,18 +80,21 @@ const CreateInvoice = () => {
         amountPaid,
         remarks,
       });
+      toast.success('Invoice created successfully');
 
       setCurrentInvoiceId(response.data.id);
       setIsSubmitted(true);
       handlePrint();
     } catch (error) {
       console.error('Error creating invoice:', error);
+      toast.success('Error creating invoice');
+
     }
   };
 
   const handleNewInvoice = () => {
     setPatientName('');
-    setPatientAge('');
+    setPatientAge(undefined);
     setPatientAddress('');
     setPatientPhone('');
     setSelectedItems([]);
@@ -100,18 +105,14 @@ const CreateInvoice = () => {
     setCurrentInvoiceId(null);
   };
 
-  const subtotal = selectedItems.reduce((total, item) => total + parseFloat(item.price), 0);
+  const subtotal = selectedItems.reduce((total, item) => total + parseFloat(item.price+""), 0);
   const grandTotal = subtotal - discount;
   const balanceAmount = grandTotal - amountPaid;
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6 space-y-6 bg-gray-100 ">
       <div style={{ display: "none" }}>
-        {currentInvoiceId && (
-          <div ref={componentRef}>
-            <InvoiceComponent invoice={{ id: currentInvoiceId, patient_name: patientName, patient_age: patientAge, patient_address: patientAddress, patient_phone: patientPhone, items: selectedItems, discount, amount_paid: amountPaid, remarks }} />
-          </div>
-        )}
+        
       </div>
       <Card className="mb-6 shadow-lg">
         <CardHeader>
@@ -270,7 +271,7 @@ const CreateInvoice = () => {
                       {!isSubmitted && (
                         <TableCell className="text-right">
                           <Button
-                            onClick={() => handleRemoveItem(item.id)}
+                            onClick={() => handleRemoveItem(item.id!)}
                             variant="default"
                             size="sm"
                             className="bg-red-500 hover:bg-red-600 text-white"

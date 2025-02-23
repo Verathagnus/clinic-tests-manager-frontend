@@ -1,7 +1,9 @@
 import React from 'react';
 import { Phone, MapPin } from 'lucide-react';
-const InvoiceComponent = ({ invoice }) => {
-  const subtotal = invoice.items.reduce((total, item) => total + item.price, 0);
+import { InvoiceProp, ItemProp } from '@/types/types';
+
+const InvoiceComponent = ({ invoice }: {invoice: InvoiceProp}) => {
+  const subtotal = invoice.items.reduce((total: number, item: ItemProp) => total + item.price, 0);
   const grandTotal = subtotal - invoice.discount;
   const balance = grandTotal - invoice.amount_paid;
 
@@ -29,7 +31,7 @@ const InvoiceComponent = ({ invoice }) => {
         <div>
           <h3 className="font-bold text-[#531ea5]">Bill Details</h3>
           <p><span className="text-[#531ea5]">Bill No.: </span>{invoice.id}</p>
-          <p><span className="text-[#531ea5]">Date: </span>{new Date(invoice.created_at).toLocaleDateString()}</p>
+          <p><span className="text-[#531ea5]">Date: </span>{new Date(invoice.created_at!).toLocaleDateString()}</p>
         </div>
       </div>
 
@@ -42,7 +44,7 @@ const InvoiceComponent = ({ invoice }) => {
           </tr>
         </thead>
         <tbody>
-          {invoice.items.map((item, index) => (
+          {invoice.items.map((item: ItemProp, index: number) => (
             <tr key={index}>
               <td className="border border-gray-300 p-2">{item.name}</td>
               <td className="border border-gray-300 p-2">{item.description}</td>

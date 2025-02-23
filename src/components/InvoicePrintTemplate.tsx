@@ -88,3 +88,4 @@ export const InvoicePrintTemplate = forwardRef<HTMLDivElement, { invoice: Invoic
     );
   }
 );
+InvoicePrintTemplate.displayName="InvoicePrintTemplate";

@@ -3,7 +3,7 @@ export interface ItemProp {
     name: string;
     description: string;
     price: number;
-    group_id?: number;
+    group_id?: number | null;
 }
 
 export interface InvoiceProp {

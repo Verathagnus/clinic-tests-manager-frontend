@@ -1,9 +1,10 @@
 // src/components/InvoiceDetails.tsx
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { EditProp } from '@/types/types';
 
 const InvoiceDetails = ({ invoiceId }: { invoiceId: number }) => {
-  const [edits, setEdits] = useState<any[]>([]);
+  const [edits, setEdits] = useState<EditProp[]>([]);
 
   useEffect(() => {
     const fetchEdits = async () => {
