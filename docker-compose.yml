@@ -1,0 +1,15 @@
+services:
+    frontend:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: nest-frontend
+        ports:
+            - '${PORT}:3000'
+        volumes:
+            - ./docker-data-backend:/usr/src/app
+        environment:
+            - PORT=3000
+            - NEXT_PUBLIC_API_URL=http://localhost:9921
+        depends_on:
+            - db
