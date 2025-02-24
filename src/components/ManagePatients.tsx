@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
+import PaginationComponent from "./Pagination";
 
 const ManagePatients = () => {
   const [patients, setPatients] = useState<PatientProp[]>([]);
@@ -103,8 +104,9 @@ const ManagePatients = () => {
           ))}
         </TableBody>
       </Table>
-      <div className="mt-4">
-        <Pagination>
+      <PaginationComponent page={page} setPage={setPage} totalPages={totalPages} />
+      {/* <div className="mt-4"> */}
+        {/* <Pagination>
           <PaginationContent>
             <PaginationItem>
               <Button
@@ -130,8 +132,8 @@ const ManagePatients = () => {
               </Button>
             </PaginationItem>
           </PaginationContent>
-        </Pagination>
-      </div>
+        </Pagination> */}
+      {/* </div> */}
     </div>
   );
 };

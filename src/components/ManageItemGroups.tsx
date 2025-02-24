@@ -23,7 +23,10 @@ const ManageItemGroups = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for delete modal
   const [itemToDelete, setItemToDelete] = useState<number | null>(null); // State to track item to delete
-
+  const [user, setUser] = useState<{ username: string }>({ username: "" });
+  useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem('user') || '{}'));
+  }, [])
   // Fetch item groups on component mount
   useEffect(() => {
     const fetchItemGroups = async () => {
@@ -165,12 +168,14 @@ const ManageItemGroups = () => {
                     >
                       <Edit />
                     </Button>
-                    <Button
-                      onClick={() => openDeleteModal(group.id)}
-                      variant="destructive"
-                    >
-                      <Trash />
-                    </Button>
+                    {user.username === 'admin' && (
+                      <Button
+                        onClick={() => openDeleteModal(group.id)}
+                        variant="destructive"
+                      >
+                        <Trash />
+                      </Button>
+                    )}
                   </>
                 )}
               </TableCell>

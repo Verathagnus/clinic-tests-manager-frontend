@@ -1,10 +1,17 @@
+"use client"
 // app/page.tsx
-import CreateInvoice from '../pages/create-invoice';
+
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
+  const router = useRouter();
+  useEffect(() => {
+    router.push('/create-invoice');
+  }, [])
   return (
     <div className="min-h-screen bg-gray-100">
-      <CreateInvoice />
+      Invoice Management Layout
     </div>
   );
 }

@@ -9,68 +9,93 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  TableHead,
 } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import ConfirmModal from "@/components/ConfirmModal"; // Import the ConfirmModal
+import { Edit, Trash } from "lucide-react";
+import { Pagination, PaginationContent, PaginationItem } from "./ui/pagination";
+import PaginationComponent from "./Pagination";
 
 const ManageItems = () => {
   const [items, setItems] = useState<ItemProp[]>([]);
   const [itemGroups, setItemGroups] = useState<ItemGroupProp[]>([]);
   const [name, setName] = useState("");
   const [groupId, setGroupId] = useState<number | null>(null);
+  const [groupIdCreate, setGroupIdCreate] = useState<number | null>(null);
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState<number>(0);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for delete modal
   const [itemToDelete, setItemToDelete] = useState<number | null>(null); // State to track item to delete
+  const [user, setUser] = useState<{ username: string }>({ username: "" });
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
 
+  useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem('user') || '{}'));
+  }, [])
   // Fetch items and item groups on component mount
   useEffect(() => {
     const fetchItems = async () => {
-      const token = localStorage.getItem("token") || "";
-      const response = await api.get("/items", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await api.get("/items/filter", {
+        params: { page, limit, search, groupId: (Number.isNaN(groupIdCreate) ? "" : groupId), sortBy, sortOrder },
       });
-      setItems(response.data);
+      setItems(response.data.items);
+      setTotalPages(response.data.totalPages);
     };
 
     const fetchItemGroups = async () => {
-      const token = localStorage.getItem("token") || "";
-      const response = await api.get("/item-groups", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/item-groups");
       setItemGroups(response.data);
     };
 
     fetchItems();
     fetchItemGroups();
-  }, []);
+  }, [page, limit, search, groupId, groupIdCreate, sortBy, sortOrder]);
+
+  // Handle search
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setPage(1); // Reset to first page on new search
+  };
+
+  // Handle sort
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC");
+    } else {
+      setSortBy(column);
+      setSortOrder("ASC");
+    }
+    setPage(1);
+  };
 
   // Create or update an item
   const handleCreateOrUpdateItem = async () => {
     try {
       if (editingId) {
-        await api.put(`/items/${editingId}`, { name, groupId, description, price });
+        await api.put(`/items/${editingId}`, { name, groupId: groupIdCreate, description, price });
         toast.success("Item edited successfully");
         setItems((prevItems) =>
           prevItems.map((item) =>
-            item.id === editingId ? { ...item, name, group_id: groupId, description, price } : item
+            item.id === editingId ? { ...item, name, group_id: groupIdCreate, description, price } : item
           )
         );
         setEditingId(null);
       } else {
-        const response = await api.post("/items", { name, groupId, description, price });
+        const response = await api.post("/items", { name, groupId: groupIdCreate, description, price });
         toast.success("Item created successfully");
         setItems((prevItems) => [...prevItems, response.data]);
       }
       setName("");
-      setGroupId(null);
+      setGroupIdCreate(null);
       setDescription("");
       setPrice(0);
       setError(null);
@@ -89,7 +114,7 @@ const ManageItems = () => {
       setError(null);
     } catch (error) {
       console.error("Error deleting item:", error);
-      toast.error("Error deleting item");
+      toast.error("Failed to delete item. Please try again.");
       setError("Failed to delete item. Please try again.");
     } finally {
       setIsDeleteModalOpen(false); // Close the modal after deletion
@@ -112,7 +137,7 @@ const ManageItems = () => {
   const handleEditItem = (item: ItemProp) => {
     setEditingId(item.id || null);
     setName(item.name);
-    setGroupId(item.group_id || null);
+    setGroupIdCreate(item.group_id || null);
     setDescription(item.description);
     setPrice(item.price);
     setError(null);
@@ -123,11 +148,11 @@ const ManageItems = () => {
       <h2 className="text-2xl font-bold mb-6">Manage Items</h2>
 
       {/* Error Alert */}
-      {error && (
+      {/* {error && (
         <Alert variant="destructive" className="mb-6">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
-      )}
+      )} */}
 
       {/* Add/Edit Item Form */}
       <div className="flex gap-4 mb-6">
@@ -139,8 +164,8 @@ const ManageItems = () => {
           className="w-48"
         />
         <select
-          value={groupId || ""}
-          onChange={(e) => setGroupId(parseInt(e.target.value))}
+          value={groupIdCreate || ""}
+          onChange={(e) => setGroupIdCreate(parseInt(e.target.value))}
           className="p-2 border rounded w-48"
         >
           <option value="">Select Item Group</option>
@@ -169,15 +194,44 @@ const ManageItems = () => {
         </Button>
       </div>
 
+      {/* Search and Filters */}
+      <div className="flex gap-4 mb-6">
+        <Input
+          type="text"
+          placeholder="Search by name or description"
+          value={search}
+          onChange={handleSearch}
+          className="w-64"
+        />
+        <select
+          value={groupId || ""}
+          onChange={(e) => { setGroupId(parseInt(e.target.value)); setPage(1); }}
+          className="p-2 border rounded w-48"
+        >
+          <option value="">All Groups</option>
+          {itemGroups.map((group) => (
+            <option key={group.id} value={group.id}>
+              {group.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Items Table */}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableCell className="font-bold">Name</TableCell>
-            <TableCell className="font-bold">Group</TableCell>
-            <TableCell className="font-bold">Description</TableCell>
-            <TableCell className="font-bold">Price</TableCell>
-            <TableCell className="font-bold">Actions</TableCell>
+            <TableHead className="cursor-pointer" onClick={() => handleSort("name")}>
+              Name {sortBy === "name" && (sortOrder === "ASC" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead>Group</TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort("description")}>
+              Description {sortBy === "description" && (sortOrder === "ASC" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead className="cursor-pointer" onClick={() => handleSort("price")}>
+              Price {sortBy === "price" && (sortOrder === "ASC" ? "↑" : "↓")}
+            </TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -194,19 +248,51 @@ const ManageItems = () => {
                   onClick={() => handleEditItem(item)}
                   variant="secondary"
                 >
-                  Edit
+                  <Edit></Edit>
                 </Button>
-                <Button
-                  onClick={() => openDeleteModal(item.id!)}
-                  variant="destructive"
-                >
-                  Delete
-                </Button>
+                {user.username === 'admin' && (
+                  <Button
+                    onClick={() => openDeleteModal(item.id!)}
+                    variant="destructive"
+                  >
+                    <Trash></Trash>
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <PaginationComponent page={page} setPage={setPage} totalPages={totalPages} />
+      {/* Pagination */}
+      {/* <Pagination className="mt-4">
+        <PaginationContent>
+          <PaginationItem>
+            <Button
+              variant="outline"
+              onClick={() => setPage(page - 1)}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+          </PaginationItem>
+          <PaginationItem>
+            <span className="px-4">
+              Page {page} of {totalPages}
+            </span>
+          </PaginationItem>
+          <PaginationItem>
+            <Button
+              variant="outline"
+              onClick={() => setPage(page + 1)}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination> */}
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

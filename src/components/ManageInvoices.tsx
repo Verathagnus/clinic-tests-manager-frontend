@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from '@/components/ui/pagination';
 import { toast } from 'sonner';
 import PdfViewer from './PdfViewer';
+import PaginationComponent from './Pagination';
 
 const ManageInvoices = () => {
   const [invoices, setInvoices] = useState<InvoiceProp[]>([]);
@@ -24,6 +25,10 @@ const ManageInvoices = () => {
   const [showDiscountField, setShowDiscountField] = useState<{ [key: number]: boolean }>({});
   const [pdfUrl, setPdfUrl] = useState<string | null>(null); // State for PDF URL
   const [isPdfOpen, setIsPdfOpen] = useState(false); // State for PDF viewer modal
+  const [user, setUser] = useState<{username: string}>({username: ""});
+  useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem('user') || '{}'));
+  }, [])
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -104,7 +109,7 @@ const ManageInvoices = () => {
       toast.error('Failed to update discount. Please try again.'); // Error toast
     }
   };
-  
+
   const refreshInvoices = async () => {
     const response = await api.get('/invoices', {
       params: { page, startDate, endDate },
@@ -224,7 +229,8 @@ const ManageInvoices = () => {
           })}
         </TableBody>
       </Table>
-      <Pagination className="mt-4">
+      <PaginationComponent page={page} setPage={setPage} totalPages={totalPages} />
+      {/* <Pagination className="mt-4">
         <PaginationContent>
           <PaginationItem>
             <Button
@@ -250,7 +256,7 @@ const ManageInvoices = () => {
             </Button>
           </PaginationItem>
         </PaginationContent>
-      </Pagination>
+      </Pagination> */}
       {/* PDF Viewer Modal */}
       {isPdfOpen && pdfUrl && (
         <PdfViewer isOpen={isPdfOpen} pdfUrl={pdfUrl} onClose={closePdfViewer} />
