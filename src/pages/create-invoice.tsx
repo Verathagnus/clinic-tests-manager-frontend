@@ -1,7 +1,7 @@
 "use client"
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { useReactToPrint } from 'react-to-print';
+// import { useReactToPrint } from 'react-to-print';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import InvoiceComponent from '@/components/InvoiceComponent';
+// import InvoiceComponent from '@/components/InvoiceComponent';
 import { ItemGroupProp, ItemProp } from '@/types/types';
 import { toast } from 'sonner';
 import PdfViewer from '@/components/PdfViewer';

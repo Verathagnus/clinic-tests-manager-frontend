@@ -5,9 +5,12 @@ services:
             dockerfile: Dockerfile
         container_name: next-frontend
         ports:
-            - '${PORT}:3000'
-        volumes:
-            - ./docker-data-frontend:/app
+            - 3000:3000
         environment:
             - PORT=3000
             - NEXT_PUBLIC_API_URL=http://localhost:9921
+        networks:
+            - clinic-network
+networks:
+    clinic-network:
+        driver: bridge

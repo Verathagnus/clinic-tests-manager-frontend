@@ -1,13 +1,10 @@
 // src/components/ManageInvoices.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { useReactToPrint } from 'react-to-print';
-import InvoiceComponent from './InvoiceComponent';
-import { InvoiceProp, ItemProp, PrintingInvoiceProp } from '@/types/types';
+import { InvoiceProp, ItemProp } from '@/types/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from '@/components/ui/pagination';
 import { toast } from 'sonner';
 import PdfViewer from './PdfViewer';
 import PaginationComponent from './Pagination';
@@ -16,7 +13,7 @@ const ManageInvoices = () => {
   const [invoices, setInvoices] = useState<InvoiceProp[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalInvoices, setTotalInvoices] = useState(0);
+  const [, setTotalInvoices] = useState(0);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [paymentAmounts, setPaymentAmounts] = useState<{ [key: number]: number }>({});
@@ -25,7 +22,7 @@ const ManageInvoices = () => {
   const [showDiscountField, setShowDiscountField] = useState<{ [key: number]: boolean }>({});
   const [pdfUrl, setPdfUrl] = useState<string | null>(null); // State for PDF URL
   const [isPdfOpen, setIsPdfOpen] = useState(false); // State for PDF viewer modal
-  const [user, setUser] = useState<{username: string}>({username: ""});
+  const [, setUser] = useState<{username: string}>({username: ""});
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem('user') || '{}'));
   }, [])
@@ -42,8 +39,8 @@ const ManageInvoices = () => {
     fetchInvoices();
   }, [page, startDate, endDate]);
   console.log('PDF URL:', pdfUrl);
-  const [printingInvoice, setPrintingInvoice] = useState<PrintingInvoiceProp | null>(null);
-  const componentRef = useRef<HTMLDivElement>(null);
+  // const [printingInvoice, setPrintingInvoice] = useState<PrintingInvoiceProp | null>(null);
+  // const componentRef = useRef<HTMLDivElement>(null);
 
   const handlePrintInvoice = async (invoiceId: number) => {
     try {

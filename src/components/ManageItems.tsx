@@ -11,11 +11,11 @@ import {
   TableCell,
   TableHead,
 } from "@/components/ui/table";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+// import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import ConfirmModal from "@/components/ConfirmModal"; // Import the ConfirmModal
 import { Edit, Trash } from "lucide-react";
-import { Pagination, PaginationContent, PaginationItem } from "./ui/pagination";
+// import { Pagination, PaginationContent, PaginationItem } from "./ui/pagination";
 import PaginationComponent from "./Pagination";
 
 const ManageItems = () => {
@@ -27,12 +27,12 @@ const ManageItems = () => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState<number>(0);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for delete modal
   const [itemToDelete, setItemToDelete] = useState<number | null>(null); // State to track item to delete
   const [user, setUser] = useState<{ username: string }>({ username: "" });
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, ] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("created_at");

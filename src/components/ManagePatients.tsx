@@ -4,28 +4,28 @@ import api from "../utils/api";
 import { PatientProp } from "@/types/types";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
+// import { Button } from "@/components/ui/button";
+// import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
 import PaginationComponent from "./Pagination";
 
 const ManagePatients = () => {
   const [patients, setPatients] = useState<PatientProp[]>([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, ] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("DESC");
 
-  const fetchPatients = async () => {
-    const response = await api.get("/patients", {
-      params: { page, limit, search, sortBy, sortOrder },
-    });
-    setPatients(response.data.patients);
-    setTotalPages(response.data.totalPages);
-  };
-
+  
   useEffect(() => {
+    const fetchPatients = async () => {
+      const response = await api.get("/patients", {
+        params: { page, limit, search, sortBy, sortOrder },
+      });
+      setPatients(response.data.patients);
+      setTotalPages(response.data.totalPages);
+    };
     fetchPatients();
   }, [page, limit, search, sortBy, sortOrder]);
 

@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { LogOut, User } from 'lucide-react';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 
 const Navbar = () => {
   const router = useRouter();
